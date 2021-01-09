@@ -1,0 +1,6 @@
+$size-board: 8;
+
+.board {
+  display: grid;
+  grid-template-columns: repeat($size-board, 80vh / $size-board);
+}

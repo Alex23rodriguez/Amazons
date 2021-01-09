@@ -1,0 +1,15 @@
+$size-board: 8;
+
+.square {
+  //   border: 1px solid black;
+  min-width: 80vh / $size-board;
+  min-height: 80vh / $size-board;
+}
+
+.color0 {
+  background-color: #ebecd0;
+}
+
+.color1 {
+  background-color: #779556;
+}
