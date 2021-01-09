@@ -5,7 +5,11 @@ import Arrow from "../arrow/arrow.component";
 
 const Square = (props) => (
   <div className={"square color" + props.color}>
-    {props.queen ? <Arrow /> : null}
+    {props.queen ? (
+      <Queen team={`team${props.queen}`} />
+    ) : props.arrow ? (
+      <Arrow />
+    ) : null}
   </div>
 );
 

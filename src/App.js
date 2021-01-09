@@ -4,7 +4,7 @@ import "./App.css";
 import Board from "./components/board/board.component";
 
 function App() {
-  return <Board size='8' />;
+  return <Board size={10} />;
 }
 
 export default App;
