@@ -3,7 +3,7 @@ import { Component } from "react";
 import "./board.styles.scss";
 import Square from "../square/square.component";
 
-import { createDiagonalsDict } from "../../utils/utils.js";
+import { createDiagonalsDict, IDToMove, moveToID } from "../../utils/utils.js";
 
 class Board extends Component {
   constructor(props) {
@@ -18,13 +18,13 @@ class Board extends Component {
       selected: undefined,
       canMove: [],
       highlight: [],
+      past_moves: [],
     };
     this.diagonalsDict = createDiagonalsDict(this.props.size);
   }
 
   calculateMoves(index, qns) {
-    qns = qns || this.state.queens;
-    let size = this.props.size;
+    qns = qns || this.state.queens; // override state queens if state has not been updated
     let ans = [];
     let diagonals = this.diagonalsDict[index];
     for (let dir of Object.keys(diagonals)) {
@@ -59,38 +59,64 @@ class Board extends Component {
     return ans;
   }
 
-  makeClickHandler = (i) => () => {
-    this.setState(({ turn, queens, arrows, selected, canMove, highlight }) => {
-      // click on queen
-      if (queens[turn].includes(i) && highlight.length !== 2) {
-        return {
-          selected: i,
-          canMove: this.calculateMoves(i, queens),
-          highlight: [i],
-        };
-      } // click on canMove
-      if (canMove.includes(i) && selected !== undefined) {
-        let q = Array.from(queens[turn]).filter((j) => j !== selected);
-        q.push(i);
-        let qns = turn === 0 ? [q, queens[1]] : [queens[0], q];
-        return {
-          queens: qns,
-          selected: undefined,
-          canMove: this.calculateMoves(i, qns),
-          highlight: [selected, i],
-        };
-      } // place arrow
-      if (canMove.includes(i) && selected === undefined) {
-        let h = Array.from(highlight);
-        h.push(i);
-        return {
-          arrows: arrows.concat(i),
-          canMove: [],
-          turn: 1 - turn,
-          highlight: h,
-        };
-      }
+  undo_move = () => {
+    if (this.state.past_moves.length === 0) {
+      return;
+    }
+    this.setState(({ past_moves, queens, arrows, turn }) => {
+      let pm = Array.from(past_moves);
+      let move = IDToMove(pm.pop(), this.props.size);
+      let arr = arrows.filter((i) => i !== move[2]);
+      let q = Array.from(queens[1 - turn]).filter((i) => i !== move[1]);
+      q.push(move[0]);
+      let qns = turn === 1 ? [q, queens[1]] : [queens[0], q];
+
+      return {
+        past_moves: pm,
+        arrows: arr,
+        queens: qns,
+        highlight:
+          pm.length > 0 ? IDToMove(pm[pm.length - 1], this.props.size) : [],
+        turn: 1 - turn,
+      };
     });
+  };
+
+  makeClickHandler = (i) => () => {
+    this.setState(
+      ({ turn, queens, arrows, selected, canMove, highlight, past_moves }) => {
+        // click on queen
+        if (queens[turn].includes(i) && highlight.length !== 2) {
+          return {
+            selected: i,
+            canMove: this.calculateMoves(i, queens),
+            highlight: [i],
+          };
+        } // click on canMove
+        if (canMove.includes(i) && selected !== undefined) {
+          let q = Array.from(queens[turn]).filter((j) => j !== selected);
+          q.push(i);
+          let qns = turn === 0 ? [q, queens[1]] : [queens[0], q];
+          return {
+            queens: qns,
+            selected: undefined,
+            canMove: this.calculateMoves(i, qns),
+            highlight: [selected, i],
+          };
+        } // place arrow
+        if (canMove.includes(i) && selected === undefined) {
+          let h = Array.from(highlight);
+          h.push(i);
+          return {
+            past_moves: past_moves.concat(moveToID(h, this.props.size)),
+            arrows: arrows.concat(i),
+            canMove: [],
+            turn: 1 - turn,
+            highlight: h,
+          };
+        }
+      }
+    );
   };
 
   render() {

@@ -39,3 +39,21 @@ export const createDiagonalsDict = (size) => {
 
   return ans;
 };
+
+export const moveToID = (move, size) => {
+  return move
+    .map((i) => {
+      let char = String.fromCharCode(65 + (i % size));
+      let num = size - Math.floor(i / size);
+      return char + num;
+    })
+    .join("-");
+};
+
+export const IDToMove = (id, size) => {
+  return id
+    .split("-")
+    .map(
+      (sid) => (size - parseInt(sid.slice(1))) * size + (sid.charCodeAt(0) - 65)
+    );
+};
