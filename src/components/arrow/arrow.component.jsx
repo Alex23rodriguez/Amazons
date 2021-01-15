@@ -1,7 +1,7 @@
 const Arrow = () => (
   <div className='container'>
     <div
-      className='centered-circle very-small'
+      className='inner-circle very-small'
       style={{ backgroundColor: "black" }}
     />
   </div>
